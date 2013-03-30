@@ -96,13 +96,24 @@ class Elgamal_KeySet implements KeySet
 
 class Elgamal_PlainText implements PlainText extends BigInteger
 {
-
+  BigInteger m;
+  Elgamal_PlainText(BigInteger m)
+  {
+    this.m = m;
+  }
 }
 
 
 class Elgamal_CipherText implements CipherText
 {
+  BigInteger c1; 
+  BigInteger c2;
 
+  Elgamal_CipherText(BigInteger c1, BigInteger c2)
+  {
+    this.c1 = c1;
+    this.c2 = c2;
+  }
 }
 
 
@@ -172,20 +183,34 @@ public class Elgamal implements CipherScheme
     return params;
   }
 
-  public Elgamal_CipherText Encrypt() throws Invalid_PublicKey, Invalid_PlainText
+  public Elgamal_CipherText Encrypt(Elgamal_PlainText msg, Elgamal_PublicKey pkey) throws Invalid_PublicKey, Invalid_PlainText
   { 
-    //if(params.pkey == null)
+    if(pkey == null)
       throw new Invalid_PublicKey();
     else
-      //encrypt
+      if(msg == null)
+        throw new Invalid_PlainText();
+      else
+      {
+        int k = params.prg.nextInt();
+        BigInteger c1 = pkey.g.pow(k);
+        BigInteger c2 = msg.m.multiply(pkey.h.pow(k));
+        return Elgamal_CipherText(c1, c2);
+        //encrypt
+      }
   }
 
-public Elgamal_PlainText Decrypt() throws Invalid_SecretKey, Invalid_CipherText
+public Elgamal_PlainText Decrypt(Elgamal_CipherText msg) throws Invalid_SecretKey, Invalid_CipherText
 {
   //if(params.skey == null)
     throw new Invalid_SecretKey();
   else
-    //decrypt
+    if(msg == null)
+      throw new Invalid_CipherText();
+    else 
+    {
+      //decrypt
+    }
 }
 
 public Elgamal_SetKey KeyGen()
