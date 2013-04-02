@@ -203,10 +203,27 @@ public class Elgamal implements CipherScheme
         throw new Invalid_PlainText();
       else
       {
-        int k = params.prg.nextInt(pkey.h.intValue()) + 1;
-        BigInteger c1 = pkey.g.pow(k);
-        c1 = c1.mod(pkey.p);
-        BigInteger c2 = msg.m.multiply(pkey.h.pow(k));
+        //int k = params.prg.nextInt(pkey.h.intValue()) + 1;
+        //BigInteger c1 = pkey.g.pow(k);
+        
+        //BigInteger k = params.prg.nextLong(pkey.h.longValue()).valueOf() + BigInteger.ONE;
+        
+        //Random rnd = new Random();
+        System.out.println("h " + pkey.h);
+        System.out.println("g " + pkey.g);
+        BigInteger k;
+        do {
+          k = new BigInteger(pkey.h.bitLength(), params.prg);
+        } while (k.compareTo(pkey.h) >= 0);
+
+        k = k.add(BigInteger.ONE);
+
+        System.out.println("k " + k);
+        BigInteger c1 = pkey.g.modPow(k, pkey.p);
+        //c1 = c1.mod(pkey.p);
+        //BigInteger c2 = msg.m.multiply(pkey.h.pow(k));
+        //c2 = c2.mod(pkey.p);
+        BigInteger c2 = msg.m.multiply(pkey.h.modPow(k, pkey.p));
         c2 = c2.mod(pkey.p);
         return new Elgamal_CipherText(c1, c2);
         //encrypt
@@ -228,11 +245,11 @@ public class Elgamal implements CipherScheme
         System.out.println("c2 " + msg.c2);
         System.out.println("x " + skey.x);
         System.out.println("p " + skey.p);
-        System.out.println("pow " + msg.c1.pow(skey.x).mod(skey.p));
-        System.out.println("divide " + msg.c2.divide(msg.c1.pow(skey.x).mod(skey.p)));
-        BigInteger m = msg.c2.divide(msg.c1.pow(skey.x));
-        System.out.println(m.mod(skey.p));
-        //m = m.mod(skey.p);
+        System.out.println("pow " + msg.c1.modPow(skey.x, skey.p));
+        System.out.println("divide " + msg.c2.divide(msg.c1.modPow(skey.x, skey.p)));
+        BigInteger m = msg.c2.divide(msg.c1.modPow(skey.x, skey.p));
+        //System.out.println(m.mod(skey.p));
+        m = m.mod(skey.p);
         return new Elgamal_PlainText(m);
       //decrypt
       }
@@ -249,16 +266,26 @@ public class Elgamal implements CipherScheme
     System.out.println(p+" "+p2);
     BigInteger g = new BigInteger(params.nb_bits, params.prg);
     g = g.mod(p);
-    System.out.println("negative exponent fuck " + p2.intValue());
-    while(g.modPow(p2,p).equals(p.subtract(BigInteger.ONE)))
+    while(g.modPow(p2,p).compareTo(p.subtract(BigInteger.ONE)) != 0)
     {
       g = new BigInteger(params.nb_bits, params.prg);
       g = g.mod(p);
     }
-    System.out.println("generator " + g);
+    System.out.println("generator " + g + " pow " + g.modPow(p2,p));
         //System.out.println(p.intValue());
-    long z = params.prg.nextLong(p.longValue()) + 1;
-    BigInteger x = BigInteger.valueOf(z);
+    
+
+    //Random rnd = new Random();
+        BigInteger x;
+        do {
+          x = new BigInteger(p.bitLength(), params.prg);
+        } while (x.compareTo(p) >= 0);
+        x = x.add(BigInteger.ONE);
+
+    //long z = params.prg.nextLong(p.longValue()) + 1;
+    
+
+    //BigInteger x = BigInteger.valueOf(z);
     System.out.println("negative exponent fuck " + x);
     BigInteger h = g.modPow(x,p);
     return new Elgamal_KeySet(new Elgamal_PublicKey(p, g, h), new Elgamal_SecretKey(p, x));
@@ -289,14 +316,13 @@ public class Elgamal implements CipherScheme
   public static BigInteger order(BigInteger a, BigInteger n)
   {
     //System.out.println(a.intValue());
-    for(int i = 1; i<n.intValue(); ++i)
+    for(BigInteger i = BigInteger.ONE; i.compareTo(n) < 0; i.add(BigInteger.ONE))
     {
       //System.out.println(i);
-      if(((a.pow(i)).mod(n)).equals(BigInteger.ONE))
+      if((a.modPow(i,n)).equals(BigInteger.ONE))
       {
-        BigInteger o = BigInteger.valueOf(i);
         //System.out.println(i);
-        return o;
+        return i;
       }
     }
     return BigInteger.ZERO;
@@ -320,22 +346,10 @@ public class Elgamal implements CipherScheme
 
   Random generator = new Random();
   Elgamal scheme = new Elgamal(Integer.parseInt(args[0]), generator);
-  Elgamal_PlainText plain = new Elgamal_PlainText(new BigInteger(Integer.parseInt(args[0]), generator));
   Elgamal_KeySet kset = scheme.KeyGen();
   System.out.println(kset.pkey.p);
   System.out.println(kset.pkey.g);
-
-
-  //final List<Integer> list = new ArrayList<Integer>();
-  //for(int i=0; i<kset.pkey.p.intValue(); ++i)
-  //{
-  //  list.add(kset.pkey.g.pow(i).mod(kset.pkey.p).intValue());
-    //System.out.println(kset.pkey.g.pow(i).mod(kset.pkey.p));
-  //}
-  // Collections.sort( list );
-  // for(int i = 0; i < list.size(); i++) {
-  //   System.out.println(list.get(i));
-  // }
+  Elgamal_PlainText plain = new Elgamal_PlainText(new BigInteger(Integer.parseInt(args[0]), generator).mod(kset.pkey.p));
 
 
 
@@ -367,15 +381,15 @@ public class Elgamal implements CipherScheme
 
 
   // BigInteger b = BigInteger.valueOf(Integer.parseInt(args[0]));
-  // BigInteger m = BigInteger.valueOf(23);
+  // BigInteger m = BigInteger.valueOf(1714499);
 
-  // BigInteger j = b.pow(11);
+  // BigInteger j = b.pow(857249);
   // j = j.mod(m);
-  // if(j.intValue() == 22)
+  // if(j.intValue() == 1714498)
   //   System.out.println("generator");
 
   // final List<Integer> list = new ArrayList<Integer>();
-  // for(int i=0; i<22; ++i)
+  // for(int i=0; i<1714498; ++i)
   // {
   //   list.add(b.pow(i).mod(m).intValue());
   // }
@@ -383,6 +397,25 @@ public class Elgamal implements CipherScheme
   // for(int i = 0; i < list.size(); i++) {
   //   System.out.println(list.get(i));
   // }
+
+  // System.out.println(b.modPow(BigInteger.valueOf(857249),BigInteger.valueOf(1714499)));
+
+
+
+
+
+
+  // final List<Integer> list = new ArrayList<Integer>();
+  // for(int i=0; i<kset.pkey.p.intValue(); ++i)
+  // {
+  //  list.add(kset.pkey.g.pow(i).mod(kset.pkey.p).intValue());
+  //   System.out.println(kset.pkey.g.pow(i).mod(kset.pkey.p));
+  // }
+  // Collections.sort( list );
+  // for(int i = 0; i < list.size(); i++) {
+  //   System.out.println(list.get(i));
+  // }
+
 
   }
 }
