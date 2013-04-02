@@ -247,9 +247,12 @@ public class Elgamal implements CipherScheme
         System.out.println("p " + skey.p);
         System.out.println("pow " + msg.c1.modPow(skey.x, skey.p));
         System.out.println("divide " + msg.c2.divide(msg.c1.modPow(skey.x, skey.p)));
-        BigInteger m = msg.c2.divide(msg.c1.modPow(skey.x, skey.p));
+        BigInteger m1 = msg.c1.modPow(skey.x, skey.p);
+        BigInteger m2 = m1.modInverse(skey.p);
+        BigInteger m = m2.multiply(msg.c2).mod(skey.p);
+        //BigInteger m = msg.c2.divide(msg.c1.modPow(skey.x, skey.p));
         //System.out.println(m.mod(skey.p));
-        m = m.mod(skey.p);
+        //m = m.mod(skey.p);
         return new Elgamal_PlainText(m);
       //decrypt
       }
