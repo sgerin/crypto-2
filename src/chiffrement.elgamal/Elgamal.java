@@ -6,6 +6,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+//import chiffrement.inter.*;
+
 
 
 interface CipherScheme
@@ -47,6 +49,7 @@ interface CipherText
 {
 
 }
+
 
 
 class Elgamal_PublicKey implements PublicKey
@@ -307,12 +310,12 @@ public class Elgamal implements CipherScheme
       //System.out.println(p);
         p = p.negate();
       }
-      BigInteger q = p.subtract(BigInteger.ONE);
+      BigInteger q = p.multiply(new BigInteger("2"));
       //System.out.println(q);
-      q = q.divide(new BigInteger("2"));
+      q = q.add(BigInteger.ONE);
       //System.out.println(q);
       if(q.isProbablePrime(certainty))
-        return p;
+        return q;
     } 
   }
 
@@ -350,8 +353,8 @@ public class Elgamal implements CipherScheme
   Random generator = new Random();
   Elgamal scheme = new Elgamal(Integer.parseInt(args[0]), generator);
   Elgamal_KeySet kset = scheme.KeyGen();
-  System.out.println(kset.pkey.p);
-  System.out.println(kset.pkey.g);
+  // System.out.println(kset.pkey.p);
+  // System.out.println(kset.pkey.g);
   Elgamal_PlainText plain = new Elgamal_PlainText(new BigInteger(Integer.parseInt(args[0]), generator).mod(kset.pkey.p));
 
 
