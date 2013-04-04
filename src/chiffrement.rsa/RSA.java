@@ -88,13 +88,6 @@ class RSA_KeySet implements KeySet
     this.skey = skey;
   }
 
-  /*public RSA_KeySet()
-  {
-
-    this.pkey = new RSA_PublicKey();
-    this.skey = new RSA_SecretKey();
-  }*/
-
 }
 
 
@@ -201,25 +194,6 @@ public class RSA implements CipherScheme
         throw new Invalid_PlainText();
       else
       {
-
-        // System.out.println("h " + pkey.h);
-        // System.out.println("g " + pkey.g);
-        // BigInteger k;
-        // do {
-        //   k = new BigInteger(pkey.h.bitLength(), params.prg);
-        // } while (k.compareTo(pkey.h) >= 0);
-
-        // k = k.add(BigInteger.ONE);
-
-        // System.out.println("k " + k);
-        // BigInteger c1 = pkey.g.modPow(k, pkey.p);
-
-        // BigInteger c2 = msg.m.multiply(pkey.h.modPow(k, pkey.p));
-        // c2 = c2.mod(pkey.p);
-        // return new RSA_CipherText(c1, c2);
-        //encrypt
-
-
         BigInteger c = msg.m.modPow(pkey.e, pkey.n);
         return new RSA_CipherText(c);
       }
@@ -236,20 +210,6 @@ public class RSA implements CipherScheme
         throw new Invalid_CipherText();
       else 
       {
-        // System.out.println("c1 " + msg.c1);
-        // System.out.println("c2 " + msg.c2);
-        // System.out.println("x " + skey.x);
-        // System.out.println("p " + skey.p);
-        // System.out.println("pow " + msg.c1.modPow(skey.x, skey.p));
-        // System.out.println("divide " + msg.c2.divide(msg.c1.modPow(skey.x, skey.p)));
-        // BigInteger m1 = msg.c1.modPow(skey.x, skey.p);
-        // BigInteger m2 = m1.modInverse(skey.p);
-        // BigInteger m = m2.multiply(msg.c2).mod(skey.p);
-        //BigInteger m = msg.c2.divide(msg.c1.modPow(skey.x, skey.p));
-        //System.out.println(m.mod(skey.p));
-        //m = m.mod(skey.p);
-        // return new RSA_PlainText(m);
-      //decrypt
       	BigInteger m = msg.c.modPow(skey.d, skey.n);
       	return new RSA_PlainText(m);
       }
@@ -258,27 +218,6 @@ public class RSA implements CipherScheme
 
   public RSA_KeySet KeyGen()
   {
-    // BigInteger p = getPrime(params.nb_bits, 1, params.prg);
-    // System.out.println("keygen " + p);
-    // BigInteger p2 = p.subtract(BigInteger.ONE);
-    // p2 = p2.divide(new BigInteger("2"));
-    // System.out.println(p+" "+p2);
-    // BigInteger g = new BigInteger(params.nb_bits, params.prg);
-    // g = g.mod(p);
-    // while(g.modPow(p2,p).compareTo(p.subtract(BigInteger.ONE)) != 0)
-    // {
-    //   g = new BigInteger(params.nb_bits, params.prg);
-    //   g = g.mod(p);
-    // }
-    // System.out.println("generator " + g + " pow " + g.modPow(p2,p));
-    //     BigInteger x;
-    //     do {
-    //       x = new BigInteger(p.bitLength(), params.prg);
-    //     } while (x.compareTo(p) >= 0);
-    //     x = x.add(BigInteger.ONE
-    // System.out.println("negative exponent fuck " + x);
-    // BigInteger h = g.modPow(x,p);
-    // return new RSA_KeySet(new RSA_PublicKey(p, g, h), new RSA_SecretKey(p, x));
 
     BigInteger p = getPrime(params.nb_bits, 1, params.prg);
     BigInteger q = getPrime(params.nb_bits, 1, params.prg);
@@ -322,32 +261,20 @@ public class RSA implements CipherScheme
 
   public static BigInteger getPrime(int nb_bits, int certainty, Random prg)
   {
-    //while(true)
-    //{
       BigInteger p = new BigInteger(nb_bits, certainty, prg);
       if(p.signum() == -1)
       {
-      //System.out.println(p);
         p = p.negate();
       }
-      //BigInteger q = p.subtract(BigInteger.ONE);
-      //System.out.println(q);
-      //q = q.divide(new BigInteger("2"));
-      //System.out.println(q);
-      //if(q.isProbablePrime(certainty))
         return p;
-    // } 
   }
 
   public static BigInteger order(BigInteger a, BigInteger n)
   {
-    //System.out.println(a.intValue());
     for(BigInteger i = BigInteger.ONE; i.compareTo(n) < 0; i.add(BigInteger.ONE))
     {
-      //System.out.println(i);
       if((a.modPow(i,n)).equals(BigInteger.ONE))
       {
-        //System.out.println(i);
         return i;
       }
     }
@@ -356,17 +283,6 @@ public class RSA implements CipherScheme
 
   public static void main(String [] args)
   {
-//     Random generator = new Random();
-//     BigInteger p = getPrime(Integer.parseInt(args[0]), 50, generator);
-//     BigInteger p2 = p.subtract(BigInteger.ONE);
-//     p2 = p2.divide(new BigInteger("2"));
-//     System.out.println(p+" "+p2);
-//     BigInteger g = new BigInteger(Integer.parseInt(args[0]), generator);
-//     g = g.mod(p);
-//     System.out.println(g + "  " + g.multiply(g) + "  " + g.pow(p2.intValue()).mod(p) + "  " + g.pow(p2.intValue()*2));
-//     System.out.println(order(g, p));
-// }
-// }
 
   //UNCOMMENT ALL UNDER THIS LINE
 
@@ -403,8 +319,6 @@ public class RSA implements CipherScheme
   {
 
   }
-
-
   }
 }
   
