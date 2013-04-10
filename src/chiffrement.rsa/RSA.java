@@ -50,6 +50,32 @@ interface CipherText
 }
 
 
+class modular_pow
+{
+  public static BigInteger mod_pow(BigInteger m, BigInteger e, BigInteger n)
+  {
+    BigInteger b = m;
+    //t = taille binaire de e
+    String s = e.toString(2);
+    System.out.println(s);
+    int t = s.length();
+    for(int i = t-2; i >= 0; i--)
+    {
+      b = b.multiply(b).mod(n);
+      System.out.println(b);
+      //Character.getNumericValue(element.charAt(2))
+      if (Character.getNumericValue(s.charAt(i)) == 1)
+      {
+        b = b.multiply(m).mod(n);
+
+      }
+      System.out.println(b);
+      System.out.println();
+    }
+    return b;
+  }
+}
+
 
 class RSA_PublicKey implements PublicKey
 {
@@ -211,7 +237,8 @@ public class RSA implements CipherScheme
       else 
       {
       	BigInteger m = msg.c.modPow(skey.d, skey.n);
-      	return new RSA_PlainText(m);
+      	//BigInteger m = modular_pow.mod_pow(msg.c, skey.d, skey.n);
+        return new RSA_PlainText(m);
       }
     }
   }
@@ -286,39 +313,60 @@ public class RSA implements CipherScheme
 
   //UNCOMMENT ALL UNDER THIS LINE
 
-  Random generator = new Random();
-  RSA scheme = new RSA(Integer.parseInt(args[0]), generator);
-  RSA_KeySet kset = scheme.KeyGen();
-  System.out.println(kset.pkey.n);
-  System.out.println(kset.pkey.e);
-  RSA_PlainText plain = new RSA_PlainText(new BigInteger(Integer.parseInt(args[0]), generator).mod(kset.pkey.n));
+    long startTime = System.nanoTime();
+
+    Random generator = new Random();
+    RSA scheme = new RSA(Integer.parseInt(args[0]), generator);
+    RSA_KeySet kset = scheme.KeyGen();
+    long endTime = System.nanoTime();
+    long duration = endTime - startTime;
+    double seconds = (double)duration / 1000000000.0;
+    System.out.println("time keygen " + seconds);
+  // System.out.println(kset.pkey.n);
+  // System.out.println(kset.pkey.e);
+    startTime = System.nanoTime();
+    RSA_PlainText plain = new RSA_PlainText(new BigInteger(Integer.parseInt(args[0]), generator).mod(kset.pkey.n));
+    endTime = System.nanoTime();
+    duration = endTime - startTime;
+    seconds = (double)duration / 1000000000.0;
+    System.out.println("time plain text " + seconds);
+
+    try
+    {
+      startTime = System.nanoTime();
+      RSA_CipherText ctext = scheme.Encrypt(plain, kset.pkey);
+      endTime = System.nanoTime();
+      duration = endTime - startTime;
+      seconds = (double)duration / 1000000000.0;
+      System.out.println("time encrypt text " + seconds);
+      startTime = System.nanoTime();
+      RSA_PlainText plain2 = scheme.Decrypt(ctext, kset.skey);
+      endTime = System.nanoTime();
+      duration = endTime - startTime;
+      seconds = (double)duration / 1000000000.0;
+      System.out.println("time encrypt text " + seconds);
+      System.out.println("plain1 " + plain.m);
+      System.out.println("cipher1 " + ctext.c);
+      System.out.println("plain2 " + plain2.m);
+    }
+    catch(Invalid_CipherText e)
+    {
+
+    }
+    catch(Invalid_PlainText e)
+    {
+
+    }
+    catch(Invalid_PublicKey e)
+    {
+
+    }
+    catch(Invalid_SecretKey e)
+    {
+
+    }
 
 
-
-  try
-  {
-    RSA_CipherText ctext = scheme.Encrypt(plain, kset.pkey);
-    RSA_PlainText plain2 = scheme.Decrypt(ctext, kset.skey);
-    System.out.println("plain1 " + plain.m);
-    System.out.println("cipher1 " + ctext.c);
-    System.out.println("plain2 " + plain2.m);
   }
-  catch(Invalid_CipherText e)
-  {
 
-  }
-  catch(Invalid_PlainText e)
-  {
-
-  }
-  catch(Invalid_PublicKey e)
-  {
-
-  }
-  catch(Invalid_SecretKey e)
-  {
-
-  }
-  }
 }
-  
